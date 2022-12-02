@@ -1,0 +1,74 @@
+---
+title: "Projeto Final"
+author: "Grupo 8"
+date: "2022-12-02"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Dependências 
+
+```{r}
+library(data.table)
+library(nnet)
+library(tidyverse)
+```
+
+## Lendo os dados e checando as colunas
+
+```{r}
+train <- fread("data/train.csv")
+train |> glimpse()
+```
+
+## Variável resposta: `Club_position`
+
+```{r}
+unique(train[ , Club_Position])
+```
+
+Temos um problema de classificação multiclasse.
+
+```{r}
+train |> 
+  group_by(Club_Position) |> 
+  tally() |> 
+  ggplot(aes(x = reorder(Club_Position, n), y = n)) +
+  geom_bar(stat = "identity") +
+  labs(x = "Posição do jogador", y = "Frequência absoluta")
+```
+
+A frequência das classes não é uniforme.
+
+
+## Análise exploratória
+
+```{r}
+train_features_long <- 
+  train |> 
+  pivot_longer(cols = c(Ball_Control,
+                        Agility,
+                        Dribbling, 
+                        Reactions, 
+                        Vision, 
+                        Composure, 
+                        Crossing,
+                        Acceleration, 
+                        Speed,
+                        Finishing,
+                        Stamina),
+               names_to = "Feature_Name", 
+               values_to = "Feature_Value") |> 
+  select(Club_Position, Feature_Name, Feature_Value)
+
+train_features_long |> 
+  ggplot(aes(x = Feature_Value, color = Feature_Name)) +
+  geom_density() +
+  facet_wrap(~Club_Position)
+```
+
+
+
