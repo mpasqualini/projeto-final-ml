@@ -43,6 +43,11 @@ train |>
 
 A frequência das classes não é uniforme.
 
+### Função de risco
+
+## Data splitting 
+
+Fazer uma separação no dataset de treino e usar como validação para estimar o risco.
 
 ## Análise exploratória
 
@@ -70,5 +75,6 @@ train_features_long |>
   facet_wrap(~Club_Position)
 ```
 
-
+## Modelos 
+### Modelo 1: regressão multinomial ou softmax
 

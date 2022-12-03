@@ -2,27 +2,29 @@
 library(data.table)
 library(nnet)
 library(tidyverse)
+  
+set.seed(2305)  
 
 # read data ----
-train <- fread("data/train.csv")
+train_raw <- fread("data/train.csv")
 
-train |> glimpse()
+train_raw |> glimpse()
 
 # check target variable ----
 ## TODO: check "Res" and "Sub" positions
-unique(train[ , Club_Position])
+unique(train_raw[ , Club_Position])
 
-train |> 
+train_raw |> 
   ggplot(aes(x = Aggression, fill = Club_Position)) +
   geom_density()
 
-train |> 
+train_raw |> 
   ggplot(aes(x = Stamina)) +
   geom_density() +
   facet_wrap(~Club_Position)
 
-train_features_long <- 
-  train |> 
+train_raw_features_long <- 
+  train_raw |> 
   pivot_longer(cols = c(Ball_Control,
                         Agility,
                         Dribbling, 
@@ -38,27 +40,38 @@ train_features_long <-
                values_to = "Feature_Value") |> 
   select(Club_Position, Feature_Name, Feature_Value)
 
-train_features_long |> 
+train_raw_features_long |> 
   ggplot(aes(x = Feature_Value, color = Feature_Name)) +
   geom_density() +
   facet_wrap(~Club_Position)
 
-setDT(train_features_long)
+setDT(train_raw_features_long)
 quantiles_features_position <- 
-  train_features_long[, c(as.list(quantile(Feature_Value, 
+  train_raw_features_long[, c(as.list(quantile(Feature_Value, 
                                            probs=c(0, .25, .5, .75, 1)))), 
                     by=.(Club_Position, Feature_Name)]  
 
-train |> 
+train_raw |> 
   group_by(Club_Position) |> 
   tally() |> 
   ggplot(aes(x = reorder(Club_Position, n), y = n)) +
   geom_bar(stat = "identity") +
   labs(x = "Posição do jogador", y = "Frequência absoluta")
 
+
 # transform variables ----
 
-train <- train[ , Club_Position := as.factor(Club_Position)]
+`%nin%` <- Negate(`%in%`)
+
+train_raw <- train_raw[Club_Position %nin%  c("Sub", "Res")]
+train_raw <- train_raw[ , Club_Position := as.factor(Club_Position)]
+
+
+# data splitting ----
+
+train_sample_ids <- sample.int(n=nrow(train_raw), size=(.7*nrow(train_raw)))
+train <- train_raw[train_sample_ids, ]
+validation <- train_raw[-train_sample_ids, ]
 
 # model ----
 ## 1st model ----
@@ -74,8 +87,13 @@ Y_train <- train |> select(Club_Position)
 train_characteristics <- cbind(X_train, Y_train)
 
 fit_nnet <- nnet(Club_Position ~ ., data = train_characteristics, 
-                 weights = rep(1, 4532),
+                 weights = rep(1, nrow(train_characteristics)),
                  size = 1)
+### validation ----
+
+Y_val <- fit_nnet |> predict(validation, type =  "class")
+
+val <- validation |> select(Club_Position)|> cbind(Y_val)
 
 ### test ----
 
