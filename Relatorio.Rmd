@@ -1,7 +1,7 @@
 ---
-title: "Projeto Final"
+title: "Relatorio"
 author: "Grupo 8"
-date: "2022-12-02"
+date: "2022-12-07"
 output: html_document
 ---
 
@@ -9,40 +9,18 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-## Dependências 
-
-```{r}
-library(data.table)
-library(nnet)
-library(tidyverse)
-```
-
-## Lendo os dados e checando as colunas
-
-```{r}
-train <- fread("data/train.csv")
-train |> glimpse()
-```
-
-## Variável resposta: `Preffered_position`
-
-```{r}
-unique(train[ , Preffered_position])
-```
+## Problema 
 
 Temos um problema de classificação multiclasse. Como cada jogador tem mais de uma classificação considerada correta, uma abordagem possível é utilizando modelos _multilabel_, que pode atribuir um ou mais rótulos não-exclusivos para uma mesma observação. 
 
 Porém, para simplificar o problema, optamos por tratá-lo apenas como um classificador multiclasse, que atribui dentre as N classes disponíveis, um único rótulo. Para não perder a informação de que mais de uma posição pode estar correta, treinamos o modelo no formato longo e para a predição final, agrupamos por jogador a de maior probabilidade.
-
 ### Função de risco
 
-## Data splitting 
+### Data splitting 
 
 Fazer uma separação no dataset de treino e usar como validação para estimar o risco.
 
 ## Análise exploratória
 
-
 ## Modelos 
 ### Modelo 1: regressão multinomial ou softmax
-

@@ -1,6 +1,7 @@
 # dependencies ----
 library(data.table)
 library(e1071)
+library(janitor)
 library(MASS)
 library(nnet)
 library(randomForest)
@@ -10,38 +11,38 @@ library(tidyverse)
 set.seed(2305)  
 
 # read data ----
-train_raw <- fread("data/train.csv")
+train_raw <- fread("data/train.csv") |> clean_names()
 
 train_raw |> glimpse()
-unique(train_raw[ , Preffered_Position])
+unique(train_raw[ , preffered_position])
 
 # prepare train dataset ----
 ## transformations ----
 train <- 
   train_raw |> 
-  mutate(Preffered_Position = str_split(Preffered_Position, "/")) |> 
-  unnest(Preffered_Position)
+  mutate(preffered_position = str_split(preffered_position, "/")) |> 
+  unnest(preffered_position)
 
 rate_features <- 
   train |> 
-  select(contains("Rate")) |> 
+  select(contains("rate")) |> 
   mutate(across(where(is.character), str_remove_all, pattern = fixed(" "))) |> 
   mutate(across(where(is.character), as.factor))
 
 numeric_features <- 
   train |> 
-  select(-Contract_Expiry) |> 
-  select(-contains(c("id", "Kit"))) |> 
+  select(-contract_expiry) |> 
+  select(-contains(c("id", "kit"))) |> 
   select_if(is.numeric)
 
 ## separate features and label ----
 
-player_position <- train |> select(Name, Preffered_Position)
+player_position <- train |> select(name, preffered_position)
 train <- cbind(player_position, rate_features, numeric_features)
 
 ## transform target ----
 
-train <- train |> mutate(Preffered_Position = as.factor(Preffered_Position))
+train <- train |> mutate(preffered_position = as.factor(preffered_position))
 
 
 ## split train and validation ----
@@ -51,8 +52,8 @@ validation <- train[-train_sample_ids, ]
 
 # models ----
 ## model 1: multinomial regression ----
-fit_multinom <- multinom(Preffered_Position ~ .,
-                         data=train[ , !(names(train) == "Name")]
+fit_multinom <- multinom(preffered_position ~ .,
+                         data=train[ , !(names(train) == "name")]
 )
 
 Y_val <- 
@@ -61,13 +62,13 @@ Y_val <-
 
 Y_val_pred <- 
   cbind(validation, Y_val) |> 
-  select(Name, Preffered_Position, Y_val) |> 
-  distinct(Name, Y_val)
+  select(name, preffered_position, Y_val) |> 
+  distinct(name, Y_val)
 
 ## model 2: random forest ----
 
-fit_rf <- randomForest(Preffered_Position ~ .,
-             data=train[ , !(names(train) == "Name")], 
+fit_rf <- randomForest(preffered_position ~ .,
+             data=train[ , !(names(train) == "name")], 
              ntree = 300
 )
 
@@ -77,14 +78,14 @@ Y_val_rf <-
 
 Y_val_rf_pred <- 
   cbind(validation, Y_val_rf) |> 
-  select(Name, Preffered_Position, Y_val_rf) |> 
-  distinct(Name, Y_val_rf)
+  select(name, preffered_position, Y_val_rf) |> 
+  distinct(name, Y_val_rf)
 
 
 ## model 3: naive bayes ----
 
-fit_nb <- naiveBayes(Preffered_Position ~ .,
-                     data=train[ , !(names(train) == "Name")]
+fit_nb <- naiveBayes(preffered_position ~ .,
+                     data=train[ , !(names(train) == "name")]
 )
 
 Y_val_nb <- 
@@ -93,13 +94,13 @@ Y_val_nb <-
 
 Y_val_nb_pred <- 
   cbind(validation, Y_val_nb) |> 
-  select(Name, Preffered_Position, Y_val_nb) |> 
-  distinct(Name, Y_val_nb)
+  select(name, preffered_position, Y_val_nb) |> 
+  distinct(name, Y_val_nb)
 
-## modelo 4: svm ----
+## model 4: svm ----
 
-fit_svm <- svm(Preffered_Position ~ .,
-               data=train[ , !(names(train) == "Name")],
+fit_svm <- svm(preffered_position ~ .,
+               data=train[ , !(names(train) == "name")],
                kernel="linear"
 )
 
@@ -109,19 +110,18 @@ Y_val_svm <-
 
 Y_val_svm_pred <- 
   cbind(validation, Y_val_svm) |> 
-  select(Name, Preffered_Position, Y_val_svm) |> 
-  distinct(Name, Y_val_svm)
+  select(name, preffered_position, Y_val_svm) |> 
+  distinct(name, Y_val_svm)
 
-## modelo 5: 
+## model 5: decision trees ----
 
-fit_tree <- rpart(Preffered_Position ~ .,
-                  data=train[ , !(names(train) == "Name")],
+fit_tree <- rpart(preffered_position ~ .,
+                  data=train[ , !(names(train) == "name")],
                   method = "class"
 )
 
-# poda:
 best_cp <- fit_tree$cptable[which.min(fit_tree$cptable[, "xerror"]), "CP"]
-fit_tree_cp <- prune(fit, cp = best_cp)
+fit_tree_cp <- prune(fit_tree, cp = best_cp)
 
 Y_val_tree <- 
   fit_tree_cp |> 
@@ -129,7 +129,7 @@ Y_val_tree <-
 
 Y_val_tree_pred <- 
   cbind(validation, Y_val_tree) |> 
-  dplyr::select(Name, Preffered_Position, Y_val_tree) |> 
-  distinct(Name, Y_val_tree)
+  dplyr::select(name, preffered_position, Y_val_tree) |> 
+  distinct(name, Y_val_tree)
 
   
