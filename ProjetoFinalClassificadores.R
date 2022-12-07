@@ -92,7 +92,6 @@ fit_nnet <- nnet(Club_Position ~ ., data = train_characteristics,
 ### validation ----
 
 Y_val <- fit_nnet |> predict(validation, type =  "class")
-
 val <- validation |> select(Club_Position)|> cbind(Y_val)
 
 ### test ----
