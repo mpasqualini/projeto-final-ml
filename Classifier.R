@@ -2,16 +2,17 @@
 library(data.table)
 library(e1071)
 library(janitor)
-library(MASS)
 library(nnet)
 library(randomForest)
 library(rpart)
 library(tidyverse)
 
-set.seed(2305)  
+set.seed(2305)
 
+# utils ----
 loss <- function(pred, ground_truth){
-  return(sum(str_detect(pred, ground_truth))/length(pred))
+  pred <- as.character(pred)
+  return(mean(str_detect(ground_truth, pred, negate = TRUE)))
 }
 
 # read data ----
@@ -29,7 +30,7 @@ train <-
 
 rate_features <- 
   train |> 
-  select(contains("rate")) |> 
+  dplyr::select(contains("rate")) |> 
   mutate(across(where(is.character), str_remove_all, pattern = fixed(" "))) |> 
   mutate(across(where(is.character), as.factor))
 
@@ -40,14 +41,11 @@ numeric_features <-
   select_if(is.numeric)
 
 ## separate features and label ----
-
 player_position <- train |> select(name, preffered_position)
 train <- cbind(player_position, rate_features, numeric_features)
 
 ## transform target ----
-
 train <- train |> mutate(preffered_position = as.factor(preffered_position))
-
 
 ## split train and validation ----
 train_sample_ids <- sample.int(n=nrow(train), size=(.7*nrow(train)))
@@ -70,7 +68,6 @@ Y_val_pred <-
   distinct(name, Y_val)
 
 ## model 2: random forest ----
-
 fit_rf <- randomForest(preffered_position ~ .,
              data=train[ , !(names(train) == "name")], 
              ntree = 300
@@ -87,7 +84,6 @@ Y_val_rf_pred <-
 
 
 ## model 3: naive bayes ----
-
 fit_nb <- naiveBayes(preffered_position ~ .,
                      data=train[ , !(names(train) == "name")]
 )
@@ -102,7 +98,6 @@ Y_val_nb_pred <-
   distinct(name, Y_val_nb)
 
 ## model 4: svm ----
-
 fit_svm <- svm(preffered_position ~ .,
                data=train[ , !(names(train) == "name")],
                kernel="linear"
@@ -118,7 +113,6 @@ Y_val_svm_pred <-
   distinct(name, Y_val_svm)
 
 ## model 5: decision trees ----
-
 fit_tree <- rpart(preffered_position ~ .,
                   data=train[ , !(names(train) == "name")],
                   method = "class"
@@ -137,7 +131,6 @@ Y_val_tree_pred <-
   distinct(name, Y_val_tree)
 
 # gathering all models ----
-
 ground_truth <- validation |>
   left_join(train_raw, by = "name") |> select(name, preffered_position.y)
 

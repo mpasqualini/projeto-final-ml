@@ -14,13 +14,27 @@ knitr::opts_chunk$set(echo = TRUE)
 Temos um problema de classificação multiclasse. Como cada jogador tem mais de uma classificação considerada correta, uma abordagem possível é utilizando modelos _multilabel_, que pode atribuir um ou mais rótulos não-exclusivos para uma mesma observação. 
 
 Porém, para simplificar o problema, optamos por tratá-lo apenas como um classificador multiclasse, que atribui dentre as N classes disponíveis, um único rótulo. Para não perder a informação de que mais de uma posição pode estar correta, treinamos o modelo no formato longo e para a predição final, agrupamos por jogador a de maior probabilidade.
+
 ### Função de risco
+
+$$
+R(g) :=  \mathbb{E}[\mathbb{I}(Y \neq g(\boldsymbol{X}))] = \mathbb{P}(Y \neq g(\boldsymbol{X}))
+$$
+
+Adotamos a função de perda 0-1, comum para problemas de classificação, mas não a única.
 
 ### Data splitting 
 
-Fazer uma separação no dataset de treino e usar como validação para estimar o risco.
+O conjunto de dados de treino foi separado em treino e validação, para estimar $\hat{R}(g)$.
 
 ## Análise exploratória
 
 ## Modelos 
-### Modelo 1: regressão multinomial ou softmax
+
+Foram treinados 5 modelos distintos:
+
+- Regressão multinomial ou _softmax_
+- Naive Bayes
+- Support Vector Machines
+- Árvores de decisão
+- Random Forest
