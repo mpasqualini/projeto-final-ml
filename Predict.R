@@ -29,3 +29,4 @@ rf_model |>
   rename(pred_class = "value") |> 
   rowid_to_column("id") |> 
   write_csv("prediction/test-prediction.csv")
+
