@@ -23,6 +23,16 @@ train_raw <- fread("data/train.csv") |> clean_names()
 train_raw |> glimpse()
 unique(train_raw[ , preffered_position])
 
+# summary stats ----
+train_skim <- 
+  train_raw |> 
+  select_if(is.numeric)|> 
+  select(-c(country_club_id, contract_expiry, national_kit, club_kit)) |> 
+  skimr::skim() |> 
+  as_tibble()
+
+saveRDS(train_skim, "artifacts/summary-stats.RDS")
+
 # prepare train dataset ----
 ## transformations ----
 train <- 
