@@ -132,4 +132,15 @@ Y_val_tree_pred <-
   dplyr::select(name, preffered_position, Y_val_tree) |> 
   distinct(name, Y_val_tree)
 
-  
+# gathering all models ----
+
+ground_truth <- validation |>
+  left_join(train_raw, by = "name") |> select(name, preffered_position.y)
+
+predictions <- reduce(list(Y_val_nb_pred,
+                           Y_val_svm_pred,
+                           Y_val_pred,
+                           Y_val_tree_pred,
+                           Y_val_rf_pred), dplyr::left_join, by = "name")
+
+results <- ground_truth |> left_join(predictions, by = "name")
