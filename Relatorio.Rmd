@@ -1,8 +1,8 @@
 ---
-title: "Relatorio"
+title: "Projeto Final | Aprendizado de Máquina"
 author: "Grupo 8"
 date: "2022-12-07"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -27,7 +27,7 @@ Adotamos a função de perda 0-1, comum para problemas de classificação, mas n
 
 ### Data splitting 
 
-O conjunto de dados de treino foi separado em treino e validação, para estimar $\hat{R}(g)$.
+O conjunto de dados de treino foi separado em treino e validação, para estimar $\hat{R}(g)$. 70% das observações foram para treino e 30% para validação.
 
 ## Análise exploratória
 
@@ -67,5 +67,7 @@ Aplicamos a técnica de análise de componente principal (PCA) para redução de
 
 
 ## Comentários
+
+O ponto mais difícil foi fazer o tratamento da variável resposta `Preffered_Position`, quebrando as uma ou mais posições de cada jogador. Com mais tempo, seria interessante alterar os _tunning parameters_ de cada modelo e também usar uma outra função de risco, como por exemplo a entropia cruzada para multiclasse.
 
 # 2. Recomendador

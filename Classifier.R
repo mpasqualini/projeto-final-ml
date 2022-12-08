@@ -132,7 +132,7 @@ Y_val_tree_pred <-
   dplyr::select(name, preffered_position, Y_val_tree) |> 
   distinct(name, Y_val_tree)
 
-# gathering all models ----
+# gather all models ----
 ground_truth <- validation |>
   left_join(train_raw, by = "name") |> select(name, preffered_position.y)
 
