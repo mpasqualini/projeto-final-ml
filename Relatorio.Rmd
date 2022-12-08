@@ -1,7 +1,12 @@
 ---
 title: "Projeto Final | Aprendizado de Máquina"
-author: "Grupo 8"
-date: "2022-12-07"
+author: 
+  - LEONARDO DE OLIVEIRA PENNA
+  - JEFERSON PEREIRA DE ANDRADE
+  - NATHALIA STEFANY SANTOS SILVA
+  - MARIANA DE CASTRO PASQUALINI
+  - MIGUEL GIOVANE GONZAGA RODRIGUES
+date: "09 de dezembro de 2022"
 output: 
   pdf_document:
      latex_engine: xelatex
@@ -19,19 +24,23 @@ Temos um problema de classificação multiclasse. Como cada jogador tem mais de 
 
 Porém, para simplificar o problema, optamos por tratá-lo apenas como um classificador multiclasse, que atribui dentre as N classes disponíveis, um único rótulo. Para não perder a informação de que mais de uma posição pode estar correta, treinamos o modelo no formato longo e para a predição final, agrupamos por jogador a de maior probabilidade.
 
+$Y$ é a variável resposta categórica, com $|\mathcal{C}|=27$, em que estimamos $\mathbb{P}(Y = \mathcal{c}|\mathbf{x})$. Temos uma matriz de covariáveis $\boldsymbol{X}$ com 41 features.
+
 ### Função de risco
 
 $$
 R(g) :=  \mathbb{E}[\mathbb{I}(Y \neq g(\boldsymbol{X}))] = \mathbb{P}(Y \neq g(\boldsymbol{X}))
 $$
 
-Adotamos a função de perda 0-1, comum para problemas de classificação, mas não a única.
+Adotamos a função de perda 0-1, comum para problemas de classificação.
 
 ### Data splitting 
 
 O conjunto de dados de treino foi separado em treino e validação, para estimar $\hat{R}(g)$. 70% das observações foram para treino e 30% para validação.
 
 ## Análise descritiva
+
+Na tabela abaixo, encontram-se as principais estatísticas descritivas das covariáveis dos modelos. 
 
 ```{r echo=FALSE}
 data_summary <- read_rds("artifacts/summary-stats.RDS")
@@ -61,7 +70,7 @@ Foram treinados 5 modelos distintos:
 - Árvores de decisão
 - Random Forest
 
-O método que forneceu o melhor resultado foi o Random Forest, de acordo com o risco estimado na tabela a seguir.
+O método que forneceu o melhor resultado foi o Random Forest, de acordo com o risco estimado no conjunto de validação, apresentado na tabela a seguir.
 
 ```{r echo=FALSE}
 
@@ -71,13 +80,15 @@ read.csv("artifacts/loss-models.csv") |>
              Modelo == "Y_val_nb" ~ "Naive Bayes",
              Modelo == "Y_val_svm" ~ "SVM",
              Modelo == "Y_val" ~ "Regressão multinomial",
-             Modelo == "Y_val_tree" ~ "Árvorede de decisão",
+             Modelo == "Y_val_tree" ~ "Árvore de decisão",
              Modelo == "Y_val_rf" ~ "Random Forest"
            )
   ) |> 
   knitr::kable( booktabs = TRUE, col.names = c("Modelo", "Risco estimado"))
 
 ```
+
+É importante notar que, comparado aos outros métodos, é possível que o método de menor risco estimado esteja super-ajustando aos dados de validação.
 
 ## Redução de dimensionalidade
 
@@ -88,6 +99,6 @@ Aplicamos a técnica de análise de componente principal (PCA) para redução de
 
 ## Comentários
 
-O ponto mais difícil foi fazer o tratamento da variável resposta `Preffered_Position`, quebrando as uma ou mais posições de cada jogador. Fazer uma seleção de variáveis pode ser interessante para melhorar o desempenho dos modelos. Com mais tempo, seria interessante alterar os _tunning parameters_ de cada modelo e também usar uma outra função de risco, como por exemplo a entropia cruzada para multiclasse.
+O ponto mais difícil foi fazer o tratamento da variável resposta `Preffered_Position`, quebrando as uma ou mais posições de cada jogador. Fazer uma seleção de variáveis pode ser interessante para melhorar o desempenho dos modelos. Com mais tempo, outro ponto é alterar os _tunning parameters_ de cada modelo e também usar uma outra função de risco, como por exemplo a entropia cruzada para classificação multiclasse. Ainda, é possível explorar outras técnicas e modelos para atribuir mais de uma classe à mesma instância.
 
 # 2. Recomendador
