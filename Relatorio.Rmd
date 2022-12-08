@@ -7,6 +7,7 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
 ```
 
 ## Problema 
@@ -38,3 +39,22 @@ Foram treinados 5 modelos distintos:
 - Support Vector Machines
 - Árvores de decisão
 - Random Forest
+
+O método que forneceu o melhor resultado foi o Random Forest,
+
+```{r echo=FALSE}
+
+read.csv("models/loss-models.csv") |> 
+  mutate(Modelo =
+           case_when(
+             Modelo == "Y_val_nb" ~ "Naive Bayes",
+             Modelo == "Y_val_svm" ~ "SVM",
+             Modelo == "Y_val" ~ "Regressão multinomial",
+             Modelo == "Y_val_tree" ~ "Árvorede de decisão",
+             Modelo == "Y_val_rf" ~ "Random Forest"
+           )
+  ) |> 
+  knitr::kable( booktabs = TRUE, col.names = c("Modelo", "Risco estimado"))
+
+```
+

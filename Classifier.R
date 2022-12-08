@@ -142,11 +142,12 @@ predictions <- reduce(list(Y_val_nb_pred,
 
 results <- ground_truth |> left_join(predictions, by = "name") |> distinct()
 
-results |>
+results_loss <- 
+  results |>
   select(starts_with("Y")) |> 
-  map(loss, results$preffered_position.y)
+  map(loss, results$preffered_position.y) |> 
+  enframe(name = "Modelo", value = "Risco estimado") |> 
+  unnest(cols = "Risco estimado")
 
-
+write_csv(results_loss, "models/loss-models.csv")
 saveRDS(fit_rf, "models/random-forest-classifier.RDS")
-
-
