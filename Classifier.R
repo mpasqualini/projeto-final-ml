@@ -10,6 +10,10 @@ library(tidyverse)
 
 set.seed(2305)  
 
+loss <- function(pred, ground_truth){
+  return(sum(str_detect(pred, ground_truth))/length(pred))
+}
+
 # read data ----
 train_raw <- fread("data/train.csv") |> clean_names()
 
@@ -143,4 +147,13 @@ predictions <- reduce(list(Y_val_nb_pred,
                            Y_val_tree_pred,
                            Y_val_rf_pred), dplyr::left_join, by = "name")
 
-results <- ground_truth |> left_join(predictions, by = "name")
+results <- ground_truth |> left_join(predictions, by = "name") |> distinct()
+
+results |>
+  select(starts_with("Y")) |> 
+  map(loss, results$preffered_position.y)
+
+
+saveRDS(fit_rf, "models/random-forest-classifier.RDS")
+
+
