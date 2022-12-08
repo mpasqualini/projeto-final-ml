@@ -21,12 +21,12 @@ numeric_features <-
 
 test <- cbind(numeric_features, rate_features)
 
-rf_model <- read_rds("models/random-forest-classifier.RDS")
+rf_model <- read_rds("artifacts/random-forest-classifier.RDS")
 
 rf_model |> 
   predict(test) |> 
   as_tibble() |> 
   rename(pred_class = "value") |> 
   rowid_to_column("id") |> 
-  write_csv("prediction/test-prediction.csv")
+  write_csv("artifacts/test-prediction.csv")
 

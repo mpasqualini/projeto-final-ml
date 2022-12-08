@@ -1,6 +1,8 @@
 # dependencies ----
 library(data.table)
 library(e1071)
+library(factoextra)
+library(gridExtra)
 library(janitor)
 library(nnet)
 library(randomForest)
@@ -149,5 +151,17 @@ results_loss <-
   enframe(name = "Modelo", value = "Risco estimado") |> 
   unnest(cols = "Risco estimado")
 
-write_csv(results_loss, "models/loss-models.csv")
-saveRDS(fit_rf, "models/random-forest-classifier.RDS")
+write_csv(results_loss, "artifacts/loss-models.csv")
+saveRDS(fit_rf, "artifacts/random-forest-classifier.RDS")
+
+# pca ----
+
+train_pca <- prcomp(distinct(numeric_features), scale. = TRUE)
+pca_ind <- fviz_pca_ind(train_pca, alpha.ind = .3)
+pca_var <- fviz_pca_var(train_pca, repel = TRUE)
+
+arrangeGrob(pca_ind, pca_var, ncol = 2) |> 
+  ggsave(filename = "artifacts/pca-plot.png", 
+         width = 21, 
+         height = 15,
+         units = "cm")

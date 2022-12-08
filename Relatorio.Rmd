@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 library(dplyr)
 ```
+# 1. Classificador
 
 ## Problema 
 
@@ -40,11 +41,11 @@ Foram treinados 5 modelos distintos:
 - Árvores de decisão
 - Random Forest
 
-O método que forneceu o melhor resultado foi o Random Forest,
+O método que forneceu o melhor resultado foi o Random Forest, de acordo com o risco estimado na tabela a seguir.
 
 ```{r echo=FALSE}
 
-read.csv("models/loss-models.csv") |> 
+read.csv("artifacts/loss-models.csv") |> 
   mutate(Modelo =
            case_when(
              Modelo == "Y_val_nb" ~ "Naive Bayes",
@@ -58,3 +59,13 @@ read.csv("models/loss-models.csv") |>
 
 ```
 
+## Redução de dimensionalidade
+
+Aplicamos a técnica de análise de componente principal (PCA) para redução de dimensionalidade das covariáveis numéricas e há claramente um agrupamento nos dados. Observa-se no gráfico abaixo os primeiros dois componentes, com as observações individuais e a correlação entre as variáveis.
+
+![](artifacts/pca-plot.png)
+
+
+## Comentários
+
+# 2. Recomendador
